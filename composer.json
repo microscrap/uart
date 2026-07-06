@@ -2,7 +2,7 @@
     "name": "microscrap/uart",
     "description": "Unix UART / Serial Bindings for The PHP Posi Extension",
     "type": "library",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "keywords": ["framework", "scrapyard-io"],
     "license": "MIT",
     "homepage": "https://dosr.projectsaturnstudios.com",
