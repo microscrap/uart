@@ -15,7 +15,7 @@
     "require": {
         "php": "^8.3",
         "ext-posi": "^0.4.0",
-        "microscrap/posix": "^0.4.0"
+        "microscrap/posix": "^0.5.0"
     },
     "autoload": {
         "psr-4": {
