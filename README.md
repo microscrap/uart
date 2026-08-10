@@ -1,14 +1,23 @@
 # microscrap/uart — Linux UART / Serial bindings for ScrapyardIO
 
-PHP library that wraps the [**posi**](https://github.com/php-io-extensions/posi) extension with global helpers, enums, and data objects. Every helper delegates to a facade class under `Microscrap\Bindings\UART`.
+> **Docs (production):** [ScrapyardIO · microscrap/uart 0.7.x](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.7.x/overview)
 
-This project provides PHP bindings to the Linux POSIX termios serial-port API, mirroring the public surface of the POSIX `<termios.h>` / `tcgetattr(2)` / `cfmakeraw(3)` family.
+[![Docs](https://img.shields.io/badge/docs-ScrapyardIO-0ea5e9?logo=readthedocs&logoColor=white)](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.7.x/overview)
+[![Packagist Version](https://img.shields.io/packagist/v/microscrap/uart.svg?label=packagist)](https://packagist.org/packages/microscrap/uart)
+[![PHP Version Require](https://img.shields.io/packagist/php-v/microscrap/uart.svg)](https://packagist.org/packages/microscrap/uart)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Requires ext-posi](https://img.shields.io/badge/ext--posi-%5E0.7-777bb4?logo=php&logoColor=white)](https://github.com/php-io-extensions/posi)
+
+PHP library that wraps the [**posi**](https://github.com/php-io-extensions/posi) extension (`Posi\Termios`) plus [`microscrap/posix`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/posix/0.7.x/overview) FD helpers with global helpers, enums, and data objects. Every helper delegates to a facade class under `Microscrap\Bindings\UART`.
+
+This is the **bindings** package — not the native extension. Ecosystem docs: [`0.7.x`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.7.x/overview).
 
 ## Highlights
 
 * Open a serial device (`/dev/ttyUSB0`, `/dev/ttyAMA0`, etc.) and configure it in one call
 * Automatic raw-mode setup (`cfmakeraw` semantics) — no line buffering, no character processing
 * Typed `BaudRate` enum covers the full `speed_t` range from `B50` to `B4000000`
+* `uart_open` / `uart_set_baud_rate` also accept plain `int` rates (Linux BOTHER / termios2 path)
 * Enum-typed termios flag sets for `c_iflag`, `c_oflag`, `c_cflag`, `c_lflag`, and `c_cc`
 * Full termios attribute inspection and mutation via `uart_tcgetattr` / `uart_tcsetattr`
 * Drain, flush, and flow control through `uart_drain`, `uart_flush`, `uart_flow`
@@ -16,10 +25,10 @@ This project provides PHP bindings to the Linux POSIX termios serial-port API, m
 
 ## Requirements
 
-* PHP 8.3+
+* PHP `^8.4|^8.5|^8.6`
 * Linux kernel (any modern version with `/dev/tty*` devices)
-* **ext-posi** ^0.4.0 — install from [php-io-extensions/posi](https://github.com/php-io-extensions/posi)
-* **microscrap/posix** ^0.4.0
+* **ext-posi** `^0.7.0` — install from [php-io-extensions/posi](https://github.com/php-io-extensions/posi)
+* **microscrap/posix** `^0.7.0`
 
 ## Installation
 
@@ -30,16 +39,16 @@ php -m | grep posi
 ```
 
 ```bash
-composer require microscrap/uart
+composer require microscrap/uart:^0.7.0
 ```
 
-Composer autoloads `src/Helpers/uart-serial.php` and `src/Helpers/uart-termios.php`, registering the global `uart_*` functions.
+Composer also pulls **`microscrap/posix` `^0.7.0`**. Autoloads `src/Helpers/uart-serial.php` and `src/Helpers/uart-termios.php`, registering the global `uart_*` functions.
 
 ## Usage
 
-Serial I/O is controlled through **global helper functions** (`uart_open`, `uart_write`, `uart_read`, etc.). All helpers delegate to facade classes and are only defined once (`function_exists` guard).
+Serial I/O is controlled through **global helper functions** (`uart_open`, `uart_write`, `uart_read`, `uart_set_baud_rate`, etc.). All helpers delegate to facade classes and are only defined once (`function_exists` guard).
 
-Enums live under `Microscrap\Bindings\UART\Enums`. The port handle is `Microscrap\Bindings\UART\DataObjects\UARTPort`.
+Enums live under `Microscrap\Bindings\UART\Enums` — cases are **FULLY UPPERCASE**. The port handle is `Microscrap\Bindings\UART\DataObjects\UARTPort` (`int $fd`, `string $path`, `int $baud`).
 
 ---
 
@@ -53,7 +62,7 @@ use Microscrap\Bindings\UART\Enums\TermiosQueue;
 
 // Open /dev/ttyUSB0 at 115200 baud, configured for raw byte I/O.
 $port = uart_open('/dev/ttyUSB0', BaudRate::B115200);
-if ($port === null) {
+if (is_null($port)) {
     exit("Failed to open port\n");
 }
 
@@ -71,6 +80,25 @@ usleep(50_000);
 $response = uart_read($port, 128);
 echo "Response: " . trim($response) . "\n";
 
+uart_close($port);
+```
+
+---
+
+### Example — non-standard baud (Linux BOTHER)
+
+```php
+<?php
+
+use Microscrap\Bindings\UART\Enums\BaudRate;
+
+// Plain integers use the Linux BOTHER / termios2 path inside ext-posi.
+$port = uart_open('/dev/ttyUSB0', 256000);
+if (is_null($port)) {
+    exit("Failed to open port\n");
+}
+
+uart_set_baud_rate($port, BaudRate::B115200);
 uart_close($port);
 ```
 
@@ -110,12 +138,13 @@ uart_close($port);
 
 | Helper | Facade method | Description |
 |---|---|---|
-| `uart_open(string $path, BaudRate $baud)` | `Serial::uartOpen` | Open and configure a port; returns `UARTPort\|null` |
+| `uart_open(string $path, BaudRate\|int $baud = BaudRate::B9600)` | `Serial::uartOpen` | Open and configure a port; returns `UARTPort\|null` |
+| `uart_set_baud_rate(UARTPort $port, BaudRate\|int $baud)` | `Serial::uartSetBaudRate` | Change baud on an open port |
 | `uart_close(UARTPort $port)` | `Serial::uartClose` | Close the file descriptor; returns 0 or -1 |
 | `uart_read(UARTPort $port, int $bytes)` | `Serial::uartRead` | Read up to `$bytes` bytes; returns `string\|false` |
 | `uart_write(UARTPort $port, string $data)` | `Serial::uartWrite` | Write `$data`; returns bytes written |
 | `uart_drain(UARTPort $port)` | `Serial::uartDrain` | Block until TX FIFO is empty (`tcdrain`) |
-| `uart_flush(UARTPort $port, TermiosQueue $queue)` | `Serial::uartFlush` | Discard queued I/O (`tcflush`) |
+| `uart_flush(UARTPort $port, TermiosQueue $queue = TermiosQueue::TCIOFLUSH)` | `Serial::uartFlush` | Discard queued I/O (`tcflush`) |
 | `uart_flow(UARTPort $port, TermiosFlow $action)` | `Serial::uartFlow` | Suspend / resume I/O (`tcflow`) |
 | `uart_make_raw(array $termios)` | `Serial::makeRaw` | Apply `cfmakeraw` semantics to a termios array |
 
@@ -124,7 +153,7 @@ uart_close($port);
 | Helper | Facade method | Description |
 |---|---|---|
 | `uart_tcgetattr(UARTPort $port)` | `Termios::uartTcgetattr` | Read current attributes; returns `array\|false` |
-| `uart_tcsetattr(UARTPort $port, array $t, TermiosAction $a)` | `Termios::uartTcsetattr` | Apply attributes; returns 0 or -1 |
+| `uart_tcsetattr(UARTPort $port, array $t, TermiosAction $a = TermiosAction::TCSANOW)` | `Termios::uartTcsetattr` | Apply attributes; returns 0 or -1 |
 | `uart_cfsetispeed(array $t, BaudRate $baud)` | `Termios::uartCfsetispeed` | Set input baud; returns new `array\|false` |
 | `uart_cfsetospeed(array $t, BaudRate $baud)` | `Termios::uartCfsetospeed` | Set output baud; returns new `array\|false` |
 | `uart_cfgetispeed(array $t)` | `Termios::uartCfgetispeed` | Decode input baud; returns `BaudRate\|null` |
@@ -134,9 +163,9 @@ uart_close($port);
 
 ```php
 final readonly class UARTPort {
-    public int     $fd;    // open file descriptor
-    public string  $path;  // device path (/dev/ttyUSB0)
-    public BaudRate $baud; // configured baud rate
+    public int    $fd;    // open file descriptor
+    public string $path;  // device path (/dev/ttyUSB0)
+    public int    $baud;  // numeric rate (e.g. 115200), not BaudRate::value
 }
 ```
 
@@ -163,6 +192,8 @@ final readonly class UARTPort {
 ### `BaudRate`
 
 `B0`, `B50`, `B75`, `B110`, `B134`, `B150`, `B200`, `B300`, `B600`, `B1200`, `B1800`, `B2400`, `B4800`, `B9600`, `B19200`, `B38400`, `B57600`, `B115200`, `B230400`, `B460800`, `B500000`, `B576000`, `B921600`, `B1000000`, `B1152000`, `B1500000`, `B2000000`, `B2500000`, `B3000000`, `B3500000`, `B4000000`
+
+Enum **values** are POSIX `speed_t` constants. `uart_open` / `uart_set_baud_rate` convert cases to numeric rates via the case name (strip leading `B`).
 
 ### `TermiosAction`
 
@@ -199,7 +230,9 @@ final readonly class UARTPort {
 
 ### `ControlFlag` — `c_cflag` bits
 
-`CBAUD`, `CBAUDEX`, `CSIZE`, `CS5`, `CS6`, `CS7`, `CS8`, `CSTOPB`, `CREAD`, `PARENB`, `PARODD`, `HUPCL`, `CLOCAL`, `CRTSCTS`
+`CBAUD`, `CBAUDEX`, `CS5`, `CS6`, `CS7`, `CS8`, `CSTOPB`, `CREAD`, `PARENB`, `PARODD`, `HUPCL`, `CLOCAL`, `CRTSCTS`
+
+`CSIZE` is omitted (same integer as `CS8`); use `CS8->value` to clear/set the character-size field.
 
 ### `LocalFlag` — `c_lflag` bits
 
@@ -219,5 +252,10 @@ final readonly class UARTPort {
 * **`cfmakeraw` semantics** — no input/output processing, 8N1, no parity
 * **`VMIN=1`, `VTIME=0`** — `read()` blocks until at least one byte arrives
 * **`TCSANOW`** — settings applied immediately
+* **Baud via `Posi\Termios::setBaudRate`** — standard `BaudRate` cases and non-standard ints
 
 To override any of these defaults, call `uart_tcgetattr`, mutate the returned array with the flag enums, and reapply with `uart_tcsetattr`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
