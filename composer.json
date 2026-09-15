@@ -2,7 +2,7 @@
     "name": "microscrap/uart",
     "description": "Unix UART / Serial Bindings for The PHP Posi Extension",
     "type": "library",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "keywords": [
         "framework",
         "scrapyard-io",
@@ -27,8 +27,8 @@
     ],
     "require": {
         "php": "^8.4|^8.5|^8.6",
-        "ext-posi": "^0.7.0",
-        "microscrap/posix": "^0.7.0"
+        "ext-posi": "^0.8.0",
+        "microscrap/posix": "^0.8.0"
     },
     "suggest": {
         "scrapyard-io/gpio-framework": "GPIO application framework over Microscrap protocol bindings (^0.7)"
@@ -47,9 +47,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "0.7.x-dev",
-            "dev-main": "0.7.x-dev",
-            "dev-0.7.x": "0.7.x-dev"
+            "dev-main": "0.8.x-dev"
         }
     },
     "minimum-stability": "dev",
