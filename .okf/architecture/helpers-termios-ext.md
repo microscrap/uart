@@ -1,9 +1,9 @@
 ---
 type: Architecture
 title: "Helpers → Termios / posix"
-description: "Global uart_* helpers call Serial / Termios facades; those call Posi\\Termios and posix_* FD helpers."
+description: "Global uart_* helpers call Serial / Termios facades; those call ext-posi global functions."
 resource: src/
-tags: [architecture, bindings, uart, helpers, termios, posix]
+tags: [architecture, bindings, uart, helpers, termios, posix, posi]
 generated: { by: "okf-documentation-generator/cursor", at: "2026-08-10T22:03:00Z" }
 status: draft
 sources:
@@ -15,10 +15,10 @@ sources:
     title: Termios helpers → Termios facade
   - id: serial
     resource: src/Serial.php
-    title: Serial facade (Posi\\Termios + posix_*)
+    title: Serial facade (ext-posi functions)
   - id: termios-facade
     resource: src/Termios.php
-    title: Termios facade (Posi\\Termios)
+    title: Termios facade (ext-posi functions)
   - id: composer
     resource: composer.json
     title: Autoload files list
@@ -38,17 +38,18 @@ app / peers / tests
     ├─ uart_open / uart_read / uart_write / …   # uart-serial.php
     │       └─► Serial::*
     │               ├─► posix_open / posix_read / posix_write / posix_close
-    │               └─► Posi\Termios::*  (tcgetattr, tcsetattr, setBaudRate, tcdrain, …)
+    │               ├─► tcgetattr / tcsetattr / posi_set_baud_rate / tcdrain / tcflush / tcflow
+    │               └─► ioctl  (modem lines)
     │
     └─ uart_tcgetattr / uart_cfsetispeed / …   # uart-termios.php
             └─► Termios::*
-                    └─► Posi\Termios::*  (tcgetattr, tcsetattr, cfset*/cfget*)
+                    └─► tcgetattr / tcsetattr / cfsetispeed / cfsetospeed / cfgetispeed / cfgetospeed
 ```
 
 Rules:[^agents][^readme][^helpers-serial]
 
 1. Helpers call `Serial` / `Termios` only.
-2. Facades call `Posi\Termios` and (for I/O) `posix_*` from **microscrap/posix** — do not invent parallel APIs.
+2. Facades call ext-posi global functions only (`posix_*`, `tc*`, `cf*`, `ioctl`, `posi_set_baud_rate`) — do not invent parallel APIs.
 3. Keep 1:1 coverage with helpers already in `uart-serial.php` / `uart-termios.php`; document drift in README / ecosystem docs.[^agents]
 
 # Autoload
@@ -60,31 +61,36 @@ Composer `autoload.files` registers:[^composer]
 
 Each function is wrapped in `if (! function_exists(...))` so a prior definition wins.[^helpers-serial][^helpers-termios]
 
-# Helper groups (0.7 surface)
+# Helper groups (0.10 surface)
 
 | Group | Helpers | Facade | Downstream |
 |-------|---------|--------|------------|
-| Lifecycle / I/O | `uart_open`, `uart_set_baud_rate`, `uart_close`, `uart_read`, `uart_write` | `Serial` | `posix_*` + `Posi\Termios::setBaudRate` / raw setup[^serial] |
-| Queue / flow | `uart_drain`, `uart_flush`, `uart_flow` | `Serial` | `Posi\Termios::{tcdrain,tcflush,tcflow}`[^serial] |
-| Raw mode | `uart_make_raw` | `Serial::makeRaw` | PHP-side `cfmakeraw` semantics on a termios array[^serial] |
-| Attributes | `uart_tcgetattr`, `uart_tcsetattr` | `Termios` | `Posi\Termios::{tcgetattr,tcsetattr}`[^termios-facade] |
-| Speeds | `uart_cfsetispeed`, `uart_cfsetospeed`, `uart_cfgetispeed`, `uart_cfgetospeed` | `Termios` | `Posi\Termios::cf*` + `BaudRate`[^termios-facade] |
+| Lifecycle / I/O | `uart_open`, `uart_set_baud_rate`, `uart_close`, `uart_read`, `uart_write` | `Serial` | `posix_*` + `posi_set_baud_rate` / raw setup[^serial] |
+| Queue / flow | `uart_drain`, `uart_flush`, `uart_flow` | `Serial` | `tcdrain` / `tcflush` / `tcflow`[^serial] |
+| Modem lines | `uart_set_modem_line`, `uart_clear_modem_line`, `uart_modem_lines` | `Serial` | `ioctl($fd, $request, ['value' => ...], $value)` with `TIOCMBIS` / `TIOCMBIC` / `TIOCMGET`; the returned int is tested, `< 0` gives -1[^serial] |
+| Raw mode | `uart_make_raw` | `Serial::makeRaw` | PHP-side `cfmakeraw` semantics on a `tcgetattr()` array, edited in place so `c_ispeed` / `c_ospeed` are kept[^serial] |
+| Attributes | `uart_tcgetattr`, `uart_tcsetattr` | `Termios` | `tcgetattr` / `tcsetattr`[^termios-facade] |
+| Speeds | `uart_cfsetispeed`, `uart_cfsetospeed`, `uart_cfgetispeed`, `uart_cfgetospeed` | `Termios` | `cfsetispeed` / `cfsetospeed` / `cfgetispeed` / `cfgetospeed` + `BaudRate`[^termios-facade] |
 
 # `uart_open` defaults
 
 Automatic configuration (override via `uart_tcgetattr` / mutate / `uart_tcsetattr`):[^readme][^serial]
 
-- Open flags: `O_RDWR | O_NOCTTY` (from `microscrap/posix` `FileControlFlag`)
+- Open flags: `O_RDWR | O_NOCTTY | O_CLOEXEC` (constants registered by ext-posi)
 - `cfmakeraw` semantics via `Serial::makeRaw`
 - `VMIN=1`, `VTIME=0`
 - Apply with `TCSANOW`
-- Baud via `Posi\Termios::setBaudRate` (enum cases → numeric rate from case name; plain `int` uses Linux BOTHER path)
+- Baud via `posi_set_baud_rate` (enum cases → numeric rate from case name; plain `int` uses Linux BOTHER path)
 
 # Baud handling note
 
 `uart_open` / `uart_set_baud_rate` accept `BaudRate|int`. Enum cases are converted to a **numeric** rate by stripping the leading `B` from the case name — **not** by using `BaudRate::value` (`speed_t`). See [BaudRate value vs numeric](../traps/baudrate-value-vs-numeric.md).[^serial]
 
-`uart_cfsetispeed` / `uart_cfsetospeed` pass `BaudRate::value` (`speed_t`) into `Posi\Termios::cfset*`.[^termios-facade]
+`uart_cfsetispeed` / `uart_cfsetospeed` pass `BaudRate::value` (`speed_t`) into `cfsetispeed` / `cfsetospeed`.[^termios-facade]
+
+# Termios array
+
+ext-posi termios arrays carry seven keys: `c_iflag`, `c_oflag`, `c_cflag`, `c_lflag`, `c_cc` (all `NCCS` indices), `c_ispeed`, `c_ospeed`. Every ext-posi function taking one requires all seven and throws `ValueError` on a missing key. Edit the `tcgetattr()` result rather than building an array. A Linux `BOTHER` custom rate survives a `tcgetattr` → `tcsetattr` round trip.[^serial][^termios-facade]
 
 # Errors / style
 
@@ -99,8 +105,8 @@ Automatic configuration (override via `uart_tcgetattr` / mutate / `uart_tcsetatt
 
 [^helpers-serial]: Serial helpers → Serial facade
 [^helpers-termios]: Termios helpers → Termios facade
-[^serial]: Serial facade (Posi\Termios + posix_*)
-[^termios-facade]: Termios facade (Posi\Termios)
+[^serial]: Serial facade (ext-posi functions)
+[^termios-facade]: Termios facade (ext-posi functions)
 [^composer]: Autoload files list
 [^readme]: Helper API tables and defaults
 [^agents]: Helpers call Serial / Termios only

@@ -5,6 +5,7 @@ use Microscrap\Bindings\UART\DataObjects\UARTPort;
 use Microscrap\Bindings\UART\Enums\BaudRate;
 use Microscrap\Bindings\UART\Enums\TermiosQueue;
 use Microscrap\Bindings\UART\Enums\TermiosFlow;
+use Microscrap\Bindings\UART\Enums\ModemLine;
 
 if (! function_exists('uart_open')) {
     function uart_open(string $path, BaudRate|int $baud = BaudRate::B9600): ?UARTPort
@@ -66,5 +67,26 @@ if (! function_exists('uart_make_raw')) {
     function uart_make_raw(array $termios): array
     {
         return Serial::makeRaw($termios);
+    }
+}
+
+if (! function_exists('uart_set_modem_line')) {
+    function uart_set_modem_line(UARTPort $port, ModemLine $line): int
+    {
+        return Serial::uartSetModemLine($port, $line);
+    }
+}
+
+if (! function_exists('uart_clear_modem_line')) {
+    function uart_clear_modem_line(UARTPort $port, ModemLine $line): int
+    {
+        return Serial::uartClearModemLine($port, $line);
+    }
+}
+
+if (! function_exists('uart_modem_lines')) {
+    function uart_modem_lines(UARTPort $port): int
+    {
+        return Serial::uartModemLines($port);
     }
 }

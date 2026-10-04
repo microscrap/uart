@@ -23,11 +23,11 @@ sources:
 
 # Rule
 
-Match peer bindings packages (`microscrap/posix`, `microscrap/open-gl`, …) in spirit — thin wrap over the native / FD stack:[^agents][^readme]
+Match peer bindings packages (`microscrap/open-gl`, …) in spirit — thin wrap over the native / FD stack:[^agents][^readme]
 
 1. Global helpers use the names callers expect (`uart_open`, `uart_tcgetattr`, …).
 2. Helpers call **`Serial`** or **`Termios`** only — never invent parallel APIs.[^helpers-serial][^helpers-termios][^agents]
-3. Facades call **`Posi\Termios`** and **`posix_*`** (from `microscrap/posix`) only for I/O / termios work.
+3. Facades call ext-posi global functions (`posix_*`, `tc*`, `cf*`, `ioctl`, `posi_set_baud_rate`) only for I/O / termios work.
 4. Keep 1:1 coverage with helpers already in `src/Helpers/uart-serial.php` and `uart-termios.php`; document drift in README / ecosystem docs.[^agents]
 5. Termios / baud integers live in backed enums — see [Enums for termios flags](enums-termios-flags.md).
 6. No ServiceProvider, Chassis/Core coupling, or Fabricate remaps in this package.[^agents]

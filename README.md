@@ -1,16 +1,16 @@
 # microscrap/uart — Linux UART / Serial bindings for ScrapyardIO
 
-> **Docs (production):** [ScrapyardIO · microscrap/uart 0.7.x](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.7.x/overview)
+> **Docs (production):** [ScrapyardIO · microscrap/uart 0.10.x](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview)
 
-[![Docs](https://img.shields.io/badge/docs-ScrapyardIO-0ea5e9?logo=readthedocs&logoColor=white)](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.7.x/overview)
+[![Docs](https://img.shields.io/badge/docs-ScrapyardIO-0ea5e9?logo=readthedocs&logoColor=white)](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview)
 [![Packagist Version](https://img.shields.io/packagist/v/microscrap/uart.svg?label=packagist)](https://packagist.org/packages/microscrap/uart)
 [![PHP Version Require](https://img.shields.io/packagist/php-v/microscrap/uart.svg)](https://packagist.org/packages/microscrap/uart)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Requires ext-posi](https://img.shields.io/badge/ext--posi-%5E0.7-777bb4?logo=php&logoColor=white)](https://github.com/php-io-extensions/posi)
+[![Requires ext-posi](https://img.shields.io/badge/ext--posi-%5E0.10-777bb4?logo=php&logoColor=white)](https://github.com/php-io-extensions/posi)
 
-PHP library that wraps the [**posi**](https://github.com/php-io-extensions/posi) extension (`Posi\Termios`) plus [`microscrap/posix`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/posix/0.7.x/overview) FD helpers with global helpers, enums, and data objects. Every helper delegates to a facade class under `Microscrap\Bindings\UART`.
+PHP library that wraps the [**posi**](https://github.com/php-io-extensions/posi) extension's global functions (`posix_*` FD calls, `tcgetattr`, `tcsetattr`, `posi_set_baud_rate`, ...) with global helpers, enums, and data objects. Every helper delegates to a facade class under `Microscrap\Bindings\UART`.
 
-This is the **bindings** package — not the native extension. Ecosystem docs: [`0.7.x`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.7.x/overview).
+This is the **bindings** package — not the native extension. Ecosystem docs: [`0.10.x`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview).
 
 ## Highlights
 
@@ -27,8 +27,7 @@ This is the **bindings** package — not the native extension. Ecosystem docs: [
 
 * PHP `^8.4|^8.5|^8.6`
 * Linux kernel (any modern version with `/dev/tty*` devices)
-* **ext-posi** `^0.7.0` — install from [php-io-extensions/posi](https://github.com/php-io-extensions/posi)
-* **microscrap/posix** `^0.7.0`
+* **ext-posi** `^0.10.0` — install from [php-io-extensions/posi](https://github.com/php-io-extensions/posi)
 
 ## Installation
 
@@ -39,10 +38,10 @@ php -m | grep posi
 ```
 
 ```bash
-composer require microscrap/uart:^0.7.0
+composer require microscrap/uart:^0.10.0
 ```
 
-Composer also pulls **`microscrap/posix` `^0.7.0`**. Autoloads `src/Helpers/uart-serial.php` and `src/Helpers/uart-termios.php`, registering the global `uart_*` functions.
+The package requires only `php` and **ext-posi**. Autoloads `src/Helpers/uart-serial.php` and `src/Helpers/uart-termios.php`, registering the global `uart_*` functions.
 
 ## Usage
 
@@ -147,6 +146,9 @@ uart_close($port);
 | `uart_flush(UARTPort $port, TermiosQueue $queue = TermiosQueue::TCIOFLUSH)` | `Serial::uartFlush` | Discard queued I/O (`tcflush`) |
 | `uart_flow(UARTPort $port, TermiosFlow $action)` | `Serial::uartFlow` | Suspend / resume I/O (`tcflow`) |
 | `uart_make_raw(array $termios)` | `Serial::makeRaw` | Apply `cfmakeraw` semantics to a termios array |
+| `uart_set_modem_line(UARTPort $port, ModemLine $line)` | `Serial::uartSetModemLine` | Assert a modem line (`TIOCMBIS`); returns 0 or -1 |
+| `uart_clear_modem_line(UARTPort $port, ModemLine $line)` | `Serial::uartClearModemLine` | Release a modem line (`TIOCMBIC`); returns 0 or -1 |
+| `uart_modem_lines(UARTPort $port)` | `Serial::uartModemLines` | Modem line state as `TIOCM_*` bits (`TIOCMGET`), or -1 |
 
 ### Termios attribute access
 
@@ -182,8 +184,12 @@ final readonly class UARTPort {
     'c_cflag' => int,       // ControlFlag bitmask (includes baud rate bits)
     'c_lflag' => int,       // LocalFlag bitmask
     'c_cc'    => int[],     // ControlChar indexed array (NCCS elements)
+    'c_ispeed' => int,      // input speed
+    'c_ospeed' => int,      // output speed
 ]
 ```
+
+All seven keys are required by every ext-posi function that takes a termios array; a missing key throws `ValueError`. Edit the array `uart_tcgetattr` returns rather than building one by hand. A Linux `BOTHER` custom rate survives a `uart_tcgetattr` → `uart_tcsetattr` round trip.
 
 ---
 
@@ -248,11 +254,11 @@ Enum **values** are POSIX `speed_t` constants. `uart_open` / `uart_set_baud_rate
 
 `uart_open` applies the following configuration automatically:
 
-* **`O_RDWR | O_NOCTTY`** — read/write access; device does not become the controlling terminal
+* **`O_RDWR | O_NOCTTY | O_CLOEXEC`** — read/write access; device does not become the controlling terminal; never inherited by a child process
 * **`cfmakeraw` semantics** — no input/output processing, 8N1, no parity
 * **`VMIN=1`, `VTIME=0`** — `read()` blocks until at least one byte arrives
 * **`TCSANOW`** — settings applied immediately
-* **Baud via `Posi\Termios::setBaudRate`** — standard `BaudRate` cases and non-standard ints
+* **Baud via `posi_set_baud_rate`** — standard `BaudRate` cases and non-standard ints
 
 To override any of these defaults, call `uart_tcgetattr`, mutate the returned array with the flag enums, and reapply with `uart_tcsetattr`.
 

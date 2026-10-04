@@ -2,8 +2,6 @@
 
 namespace Microscrap\Bindings\UART;
 
-use Posi\Termios as Posi;
-use Microscrap\Bindings\POSIX\Enums\FileControlFlag;
 use Microscrap\Bindings\UART\DataObjects\UARTPort;
 use Microscrap\Bindings\UART\Enums\BaudRate;
 use Microscrap\Bindings\UART\Enums\ControlChar;
@@ -14,6 +12,8 @@ use Microscrap\Bindings\UART\Enums\OutputFlag;
 use Microscrap\Bindings\UART\Enums\TermiosAction;
 use Microscrap\Bindings\UART\Enums\TermiosQueue;
 use Microscrap\Bindings\UART\Enums\TermiosFlow;
+use Microscrap\Bindings\UART\Enums\ModemControl;
+use Microscrap\Bindings\UART\Enums\ModemLine;
 
 class Serial
 {
@@ -24,39 +24,39 @@ class Serial
      * $baud accepts either a BaudRate enum case (for standard POSIX rates) or a
      * plain integer (for non-standard rates like 256000 that require the Linux
      * BOTHER/termios2 path).  On non-Linux systems, non-standard integers will
-     * cause setBaudRate to return -1 and the open to fail.
+     * cause posi_set_baud_rate to return -1 and the open to fail.
      *
-     * Opens with O_RDWR | O_NOCTTY so the kernel does not make this process
-     * the controlling terminal of the device.
+     * Opens with O_RDWR | O_NOCTTY | O_CLOEXEC: never this process's controlling terminal, never inherited by a child.
      */
     public static function uartOpen(string $path, BaudRate|int $baud = BaudRate::B9600): ?UARTPort
     {
-        // Posi::setBaudRate expects the actual baud rate integer (9600, 115200…),
+        // posi_set_baud_rate expects the actual baud rate integer (9600, 115200…),
         // not the POSIX speed_t constant stored in BaudRate::value (13, 4098…).
         // Extract it from the enum case name by stripping the leading 'B'.
         $baudInt = $baud instanceof BaudRate ? (int) ltrim($baud->name, 'B') : $baud;
 
-        $flags = FileControlFlag::O_RDWR->value | FileControlFlag::O_NOCTTY->value;
-        $fd = posix_open($path, $flags);
+        // O_NOCTTY: the port never becomes this process's controlling terminal.
+        // O_CLOEXEC: a child process (a pool worker, a shell) never inherits the port and keeps it open.
+        $fd = posix_open($path, O_RDWR | O_NOCTTY | O_CLOEXEC);
         if ($fd < 0) {
             return null;
         }
 
-        $termios = Posi::tcgetattr($fd);
+        $termios = tcgetattr($fd);
         if ($termios === false) {
             posix_close($fd);
             return null;
         }
 
         $termios = self::makeRaw($termios);
-        if (Posi::tcsetattr($fd, TermiosAction::TCSANOW->value, $termios) !== 0) {
+        if (tcsetattr($fd, TermiosAction::TCSANOW->value, $termios) !== 0) {
             posix_close($fd);
             return null;
         }
 
-        // setBaudRate handles both standard B* rates and arbitrary rates
+        // posi_set_baud_rate handles both standard B* rates and arbitrary rates
         // (e.g. 256000) via the Linux BOTHER/termios2 ioctl path.
-        if (Posi::setBaudRate($fd, $baudInt) !== 0) {
+        if (posi_set_baud_rate($fd, $baudInt) !== 0) {
             posix_close($fd);
             return null;
         }
@@ -86,7 +86,7 @@ class Serial
     public static function uartSetBaudRate(UARTPort $port, BaudRate|int $baud): int
     {
         $baudInt = $baud instanceof BaudRate ? (int) ltrim($baud->name, 'B') : $baud;
-        return Posi::setBaudRate($port->fd, $baudInt);
+        return posi_set_baud_rate($port->fd, $baudInt);
     }
 
     /**
@@ -94,7 +94,7 @@ class Serial
      */
     public static function uartDrain(UARTPort $port): int
     {
-        return Posi::tcdrain($port->fd);
+        return tcdrain($port->fd);
     }
 
     /**
@@ -102,7 +102,7 @@ class Serial
      */
     public static function uartFlush(UARTPort $port, TermiosQueue $queue = TermiosQueue::TCIOFLUSH): int
     {
-        return Posi::tcflush($port->fd, $queue->value);
+        return tcflush($port->fd, $queue->value);
     }
 
     /**
@@ -110,7 +110,25 @@ class Serial
      */
     public static function uartFlow(UARTPort $port, TermiosFlow $action): int
     {
-        return Posi::tcflow($port->fd, $action->value);
+        return tcflow($port->fd, $action->value);
+    }
+
+    /** Asserts one modem control line (TIOCMBIS). 0, or -1 when the device has none (a pty) or the ioctl fails. */
+    public static function uartSetModemLine(UARTPort $port, ModemLine $line): int
+    {
+        return ioctl($port->fd, ModemControl::TIOCMBIS->value, ['value' => $line->value], $unused) < 0 ? -1 : 0;
+    }
+
+    /** Releases one modem control line (TIOCMBIC). 0, or -1 when the device has none or the ioctl fails. */
+    public static function uartClearModemLine(UARTPort $port, ModemLine $line): int
+    {
+        return ioctl($port->fd, ModemControl::TIOCMBIC->value, ['value' => $line->value], $unused) < 0 ? -1 : 0;
+    }
+
+    /** Every modem line's state as TIOCM_* bits (TIOCMGET), or -1. */
+    public static function uartModemLines(UARTPort $port): int
+    {
+        return ioctl($port->fd, ModemControl::TIOCMGET->value, ['value' => 0], $lines) < 0 ? -1 : $lines;
     }
 
     /**

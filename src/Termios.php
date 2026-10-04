@@ -2,7 +2,6 @@
 
 namespace Microscrap\Bindings\UART;
 
-use Posi\Termios as Posi;
 use Microscrap\Bindings\UART\DataObjects\UARTPort;
 use Microscrap\Bindings\UART\Enums\BaudRate;
 use Microscrap\Bindings\UART\Enums\TermiosAction;
@@ -15,7 +14,7 @@ class Termios
      */
     public static function uartTcgetattr(UARTPort $port): array|false
     {
-        return Posi::tcgetattr($port->fd);
+        return tcgetattr($port->fd);
     }
 
     /**
@@ -24,7 +23,7 @@ class Termios
      */
     public static function uartTcsetattr(UARTPort $port, array $termios, TermiosAction $action = TermiosAction::TCSANOW): int
     {
-        return Posi::tcsetattr($port->fd, $action->value, $termios);
+        return tcsetattr($port->fd, $action->value, $termios);
     }
 
     /**
@@ -32,7 +31,7 @@ class Termios
      */
     public static function uartCfsetispeed(array $termios, BaudRate $baud): array|false
     {
-        return Posi::cfsetispeed($termios, $baud->value);
+        return cfsetispeed($termios, $baud->value);
     }
 
     /**
@@ -40,7 +39,7 @@ class Termios
      */
     public static function uartCfsetospeed(array $termios, BaudRate $baud): array|false
     {
-        return Posi::cfsetospeed($termios, $baud->value);
+        return cfsetospeed($termios, $baud->value);
     }
 
     /**
@@ -52,7 +51,7 @@ class Termios
      */
     public static function uartCfgetispeed(array $termios): ?BaudRate
     {
-        return BaudRate::tryFrom(Posi::cfgetispeed($termios));
+        return BaudRate::tryFrom(cfgetispeed($termios));
     }
 
     /**
@@ -61,6 +60,6 @@ class Termios
      */
     public static function uartCfgetospeed(array $termios): ?BaudRate
     {
-        return BaudRate::tryFrom(Posi::cfgetospeed($termios));
+        return BaudRate::tryFrom(cfgetospeed($termios));
     }
 }

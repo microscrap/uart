@@ -4,11 +4,11 @@
 
 ## Role
 
-Bindings-only Composer package over **ext-posi** (`Posi\Termios`) plus **microscrap/posix** FD helpers. Global `uart_*` helpers, facades (`Serial`, `Termios`), enums, and `UARTPort`. No ServiceProvider, no Chassis/Core coupling.
+Bindings-only Composer package over **ext-posi** 0.10 global functions (`posix_*`, `tcgetattr`, `tcsetattr`, `ioctl`, `posi_set_baud_rate`, ...). Requires only `php` and `ext-posi` `^0.10.0`. Global `uart_*` helpers, facades (`Serial`, `Termios`), enums, and `UARTPort`. No ServiceProvider, no Chassis/Core coupling.
 
 ## Rules
 
-* Helpers call `Serial` / `Termios` only; those call `Posi\Termios` and `posix_*` helpers — do not invent parallel APIs.
+* Helpers call `Serial` / `Termios` only; those call ext-posi global functions — do not invent parallel APIs.
 * Keep 1:1 coverage with helpers already in `src/Helpers/uart-serial.php` and `uart-termios.php`; document drift in README / ecosystem docs.
 * Enums in `src/Enums/*` are int-backed with **FULLY UPPERCASE** cases.
 * Prefer `is_null($var)` over `$var === null`.

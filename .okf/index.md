@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # microscrap/uart Knowledge Bundle
 
-Package knowledge for `microscrap/uart` (UART / serial bindings over **ext-posi** `Posi\Termios` + **microscrap/posix**, v0.7.0).
+Package knowledge for `microscrap/uart` (UART / serial bindings over **ext-posi** 0.10 global functions, v0.10.0).
 Read this index first; open only the concepts needed for the task.
 
 **Trust rule:** Prefer `status: stable`. Treat `deprecated` as historical only. New agent-written concepts stay `status: draft` until a human verifies them.
@@ -15,13 +15,13 @@ Read this index first; open only the concepts needed for the task.
 
 # Orientation
 
-* [Package (0.7)](orientation/package.md) - Composer identity, namespace, helpers/facades over Posi\Termios + posix.
-* [Ecosystem docs](orientation/ecosystem-docs.md) - Published 0.7.x overview and docs site entrypoint.
-* [Pair with protocol peers](orientation/pairing-protocol-peers.md) - posix below; gpio / i2c / spi beside; gpio-framework above.
+* [Package (0.10)](orientation/package.md) - Composer identity, namespace, helpers/facades over ext-posi functions.
+* [Ecosystem docs](orientation/ecosystem-docs.md) - Published 0.10.x overview and docs site entrypoint.
+* [Pair with protocol peers](orientation/pairing-protocol-peers.md) - ext-posi below; gpio / i2c / spi beside; framework above.
 
 # Architecture
 
-* [Helpers → Termios / posix](architecture/helpers-termios-ext.md) - Call stack: helpers → Serial / Termios → Posi\Termios + posix_*.
+* [Helpers → Termios / posix](architecture/helpers-termios-ext.md) - Call stack: helpers → Serial / Termios → ext-posi functions.
 
 # Conventions
 

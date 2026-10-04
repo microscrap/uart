@@ -15,7 +15,7 @@ sources:
     title: BaudRate values are speed_t; open accepts int for BOTHER
   - id: serial
     resource: src/Serial.php
-    title: BaudRate → numeric via case name strip; setBaudRate path
+    title: BaudRate → numeric via case name strip; posi_set_baud_rate path
   - id: termios-facade
     resource: src/Termios.php
     title: cfset* uses BaudRate::value
@@ -41,9 +41,9 @@ Two different integers share the word “baud” in this package:[^agents][^read
 | Numeric rate | Actual bits/sec (or BOTHER rate) | `115200` |
 | `UARTPort::$baud` | **Numeric** rate stored at open | `115200`[^port] |
 
-`uart_open` / `uart_set_baud_rate` accept `BaudRate|int` and convert enum cases by stripping the leading `B` from the **case name**, then call `Posi\Termios::setBaudRate($fd, $baudInt)`. Plain `int` arguments take the Linux **BOTHER** / termios2 path.[^serial][^readme]
+`uart_open` / `uart_set_baud_rate` accept `BaudRate|int` and convert enum cases by stripping the leading `B` from the **case name**, then call `posi_set_baud_rate($fd, $baudInt)`. Plain `int` arguments take the Linux **BOTHER** / termios2 path.[^serial][^readme]
 
-By contrast, `uart_cfsetispeed` / `uart_cfsetospeed` pass **`BaudRate::value`** (`speed_t`) into `Posi\Termios::cfset*`.[^termios-facade]
+By contrast, `uart_cfsetispeed` / `uart_cfsetospeed` pass **`BaudRate::value`** (`speed_t`) into `cfsetispeed` / `cfsetospeed`.[^termios-facade]
 
 `uart_cfgetispeed` / `uart_cfgetospeed` return `BaudRate|null` via `BaudRate::tryFrom(speed_t)` — non-standard BOTHER rates may not decode to an enum case.[^termios-facade]
 
@@ -51,7 +51,7 @@ By contrast, `uart_cfsetispeed` / `uart_cfsetospeed` pass **`BaudRate::value`** 
 
 - Prefer passing `BaudRate::B115200` (or a plain numeric `int`) into `uart_open` / `uart_set_baud_rate` — do **not** pass `BaudRate::B115200->value` expecting 115200 bps.[^serial]
 - Treat `UARTPort::$baud` as numeric bps for application logic.[^agents][^port]
-- Use `uart_cfset*` / `uart_cfget*` when working with classic `speed_t` fields inside a termios array; use `setBaudRate` path for BOTHER / arbitrary rates.[^readme]
+- Use `uart_cfset*` / `uart_cfget*` when working with classic `speed_t` fields inside a termios array; use the `posi_set_baud_rate` path for BOTHER / arbitrary rates.[^readme]
 
 # Related
 
@@ -60,7 +60,7 @@ By contrast, `uart_cfsetispeed` / `uart_cfsetospeed` pass **`BaudRate::value`** 
 
 [^agents]: UARTPort::$baud vs BaudRate::value
 [^readme]: BaudRate values are speed_t; open accepts int for BOTHER
-[^serial]: BaudRate → numeric via case name strip; setBaudRate path
+[^serial]: BaudRate → numeric via case name strip; posi_set_baud_rate path
 [^termios-facade]: cfset* uses BaudRate::value
 [^port]: UARTPort::$baud is int numeric rate
 [^baud]: speed_t case values

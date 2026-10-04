@@ -20,15 +20,15 @@ sources:
 
 # Symptom
 
-`uart_open('/dev/ttyUSB0', …)` (or `/dev/ttyAMA0`, …) returns `null` even though the device node exists and **ext-posi** / **microscrap/posix** are loaded.[^readme]
+`uart_open('/dev/ttyUSB0', …)` (or `/dev/ttyAMA0`, …) returns `null` even though the device node exists and **ext-posi** is loaded.[^readme]
 
 # Cause
 
-`Serial::uartOpen` opens with `posix_open($path, O_RDWR | O_NOCTTY)`. If the FD is `< 0`, it returns `null` immediately — no exception.[^serial]
+`Serial::uartOpen` opens with `posix_open($path, O_RDWR | O_NOCTTY | O_CLOEXEC)`. If the FD is `< 0`, it returns `null` immediately — no exception.[^serial]
 
 On typical Linux images, serial devices under `/dev/tty*` are owned by `root` and group **`dialout`** (or `uucp` / vendor-specific). A process whose user is not in that group gets `EACCES` from the open syscall, which surfaces here as a failed open / `null` port.
 
-Other failure modes after a successful open (termios get/set / `setBaudRate` failure) also return `null` after closing the FD — permissions are only the most common first gate.[^serial]
+Other failure modes after a successful open (termios get/set / `posi_set_baud_rate` failure) also return `null` after closing the FD — permissions are only the most common first gate.[^serial]
 
 # Mitigation
 
@@ -40,7 +40,7 @@ Other failure modes after a successful open (termios get/set / `setBaudRate` fai
 # Related
 
 * [Helpers → Termios / posix](../architecture/helpers-termios-ext.md)
-* [Package (0.7)](../orientation/package.md)
+* [Package (0.10)](../orientation/package.md)
 
 [^serial]: uartOpen returns null when posix_open fd < 0
 [^readme]: Linux /dev/tty* device examples and open failure pattern

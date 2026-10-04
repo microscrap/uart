@@ -32,11 +32,11 @@ POSIX / Linux termios uses integer `#define`s for baud (`speed_t`), flag bitmask
 - No class-level constants in `src/` — prefer enums.[^agents]
 - Know which path wants **numeric rate** vs **`BaudRate::value` (`speed_t`)** — see [BaudRate value vs numeric](../traps/baudrate-value-vs-numeric.md).
 
-# Enum inventory (0.7.0)
+# Enum inventory (0.10.0)
 
 | Enum | Purpose | Notes |
 |------|---------|-------|
-| `BaudRate` | POSIX / Linux `speed_t` constants (`B0`…`B4000000`) | `::value` is **not** the numeric bps for `setBaudRate`[^baud][^readme] |
+| `BaudRate` | POSIX / Linux `speed_t` constants (`B0`…`B4000000`) | `::value` is **not** the numeric bps for `posi_set_baud_rate`[^baud][^readme] |
 | `TermiosAction` | `tcsetattr` when-to-apply (`TCSANOW`, `TCSADRAIN`, `TCSAFLUSH`) | |
 | `TermiosQueue` | `tcflush` queue select (`TCIFLUSH`, `TCOFLUSH`, `TCIOFLUSH`) | |
 | `TermiosFlow` | `tcflow` action (`TCOOFF`…`TCION`) | |

@@ -1,3 +1,9 @@
+## 2026-10-03
+* **Update**: ported to **0.10.0**. `ext-posi` 0.10 is a C rewrite: `Posi\System` / `Posi\Termios` / `Posi\Memory` are gone, replaced by global functions (`posix_*`, `tcgetattr`, `tcsetattr`, `cf*speed`, `tcdrain` / `tcflush` / `tcflow`, `ioctl`, `posi_set_baud_rate`). `microscrap/posix` dropped (absorbed by ext-posi); the package requires only `php` and `ext-posi` `^0.10.0`. `Serial` opens with `O_RDWR | O_NOCTTY | O_CLOEXEC` constants; modem-line methods use `ioctl(..., ['value' => ...], $value)`. Termios arrays carry `c_ispeed` / `c_ospeed` (all seven keys required). Docs URLs and branch alias moved to 0.10.x; suggest `scrapyard-io/framework` `^0.10.0`. README, AGENTS.md and the bundle updated.
+
+## 2026-09-24
+* **Update**: relabeled 0.8.0 → 0.9.0 with `ext-posi` / `microscrap/posix` ^0.9.0. No code change.
+
 ## 2026-09-14
 * **Update**: relabeled 0.7.0 → 0.8.0 with `ext-posi` / `ext-ftdi` 0.8.0. No code change.
 
