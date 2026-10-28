@@ -1,16 +1,16 @@
 # microscrap/uart — Linux UART / Serial bindings for ScrapyardIO
 
-> **Docs (production):** [ScrapyardIO · microscrap/uart 0.10.x](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview)
+> **Docs (production):** [ScrapyardIO · microscrap/uart 0.11.x](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview)
 
-[![Docs](https://img.shields.io/badge/docs-ScrapyardIO-0ea5e9?logo=readthedocs&logoColor=white)](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview)
+[![Docs](https://img.shields.io/badge/docs-ScrapyardIO-0ea5e9?logo=readthedocs&logoColor=white)](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview)
 [![Packagist Version](https://img.shields.io/packagist/v/microscrap/uart.svg?label=packagist)](https://packagist.org/packages/microscrap/uart)
 [![PHP Version Require](https://img.shields.io/packagist/php-v/microscrap/uart.svg)](https://packagist.org/packages/microscrap/uart)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Requires ext-posi](https://img.shields.io/badge/ext--posi-%5E0.10-777bb4?logo=php&logoColor=white)](https://github.com/php-io-extensions/posi)
+[![Requires ext-posi](https://img.shields.io/badge/ext--posi-%5E0.11-777bb4?logo=php&logoColor=white)](https://github.com/php-io-extensions/posi)
 
 PHP library that wraps the [**posi**](https://github.com/php-io-extensions/posi) extension's global functions (`posix_*` FD calls, `tcgetattr`, `tcsetattr`, `posi_set_baud_rate`, ...) with global helpers, enums, and data objects. Every helper delegates to a facade class under `Microscrap\Bindings\UART`.
 
-This is the **bindings** package — not the native extension. Ecosystem docs: [`0.10.x`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview).
+This is the **bindings** package — not the native extension. Ecosystem docs: [`0.11.x`](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview).
 
 ## Highlights
 
@@ -25,9 +25,9 @@ This is the **bindings** package — not the native extension. Ecosystem docs: [
 
 ## Requirements
 
-* PHP `^8.4|^8.5|^8.6`
+* PHP `~8.4.27||^8.5.12`
 * Linux kernel (any modern version with `/dev/tty*` devices)
-* **ext-posi** `^0.10.0` — install from [php-io-extensions/posi](https://github.com/php-io-extensions/posi)
+* **ext-posi** `^0.11.0` — install from [php-io-extensions/posi](https://github.com/php-io-extensions/posi)
 
 ## Installation
 
@@ -38,7 +38,7 @@ php -m | grep posi
 ```
 
 ```bash
-composer require microscrap/uart:^0.10.0
+composer require microscrap/uart:^0.11.0
 ```
 
 The package requires only `php` and **ext-posi**. Autoloads `src/Helpers/uart-serial.php` and `src/Helpers/uart-termios.php`, registering the global `uart_*` functions.

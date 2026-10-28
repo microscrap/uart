@@ -2,7 +2,7 @@
     "name": "microscrap/uart",
     "description": "Unix UART / Serial Bindings for The PHP Posi Extension",
     "type": "library",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "keywords": [
         "framework",
         "scrapyard-io",
@@ -13,9 +13,9 @@
         "bindings"
     ],
     "license": "MIT",
-    "homepage": "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview",
+    "homepage": "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview",
     "support": {
-        "docs": "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview",
+        "docs": "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview",
         "source": "https://github.com/microscrap/uart",
         "issues": "https://github.com/microscrap/uart/issues"
     },
@@ -26,14 +26,14 @@
         }
     ],
     "require": {
-        "php": "^8.4|^8.5|^8.6",
-        "ext-posi": "^0.10.0"
+        "php": "~8.4.27||^8.5.12",
+        "ext-posi": "^0.11.0"
     },
     "require-dev": {
         "pestphp/pest": "^4.0"
     },
     "suggest": {
-        "scrapyard-io/framework": "^0.10.0 - GPIO application framework over Microscrap protocol bindings"
+        "scrapyard-io/framework": "^0.11.0 - GPIO application framework over Microscrap protocol bindings"
     },
     "autoload": {
         "psr-4": {
@@ -52,7 +52,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "0.10.x-dev"
+            "dev-main": "0.11.x-dev"
         }
     },
     "minimum-stability": "dev",

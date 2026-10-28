@@ -24,17 +24,17 @@ sources:
 
 | Concern | Package |
 |---------|---------|
-| POSIX FD / termios / ioctl | **ext-posi** `^0.10.0` (below — global functions: `posix_*`, `tcgetattr`, `ioctl`, ...)[^serial] |
+| POSIX FD / termios / ioctl | **ext-posi** `^0.11.0` (below — global functions: `posix_*`, `tcgetattr`, `ioctl`, ...)[^serial] |
 | UART / serial (this package) | `microscrap/uart` |
-| GPIO | `microscrap/gpio` `^0.10` |
-| I2C | `microscrap/i2c` `^0.10` |
-| SPI | `microscrap/spi` `^0.10` |
+| GPIO | `microscrap/gpio` `^0.11` |
+| I2C | `microscrap/i2c` `^0.11` |
+| SPI | `microscrap/spi` `^0.11` |
 | USB MPSSE / FTDI | `microscrap/ftdi` (sits **beside** — USB path, not a uart child) |
-| Higher GPIO orchestration | `scrapyard-io/framework` `^0.10.0` (suggested; above the microscrap protocol packages) |
+| Higher GPIO orchestration | `scrapyard-io/framework` `^0.11.0` (suggested; above the microscrap protocol packages) |
 
 # Typical flow
 
-1. Depend on this package (requires **ext-posi** `^0.10.0`).
+1. Depend on this package (requires **ext-posi** `^0.11.0`).
 2. Open `/dev/tty*` via `uart_open` (internally `posix_open`, `tcgetattr`, `tcsetattr`, `posi_set_baud_rate`).
 3. Application / framework may compose uart with other peers — do not invent framework providers inside this package.[^agents]
 
@@ -45,7 +45,7 @@ sources:
 
 # Related
 
-* [Package (0.10)](package.md)
+* [Package (0.11)](package.md)
 * [Helpers → Termios / posix](../architecture/helpers-termios-ext.md)
 
 [^readme]: Bindings role; requires ext-posi

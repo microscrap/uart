@@ -1,9 +1,9 @@
 ---
 type: Orientation
-title: Package (0.10)
-description: "microscrap/uart 0.10.0 — UART/serial PHP helpers over ext-posi global functions; no ServiceProvider."
+title: Package (0.11)
+description: "microscrap/uart 0.11.0 — UART/serial PHP helpers over ext-posi global functions; no ServiceProvider."
 resource: .
-tags: [orientation, uart, microscrap, bindings, 0.10]
+tags: [orientation, uart, microscrap, bindings, 0.11]
 generated: { by: "okf-documentation-generator/cursor", at: "2026-08-10T22:03:00Z" }
 status: draft
 sources:
@@ -12,7 +12,7 @@ sources:
     title: Package name, namespace, autoload helpers
   - id: readme
     resource: README.md
-    title: Package README (0.10.x requirements and surface)
+    title: Package README (0.11.x requirements and surface)
   - id: agents
     resource: AGENTS.md
     title: Agent rules for this package
@@ -26,16 +26,16 @@ sources:
 
 # What it is
 
-Composer package `microscrap/uart` at **0.10.0** — PHP helpers, facades, enums, and `UARTPort` over the global functions of [**php-io-extensions/posi**](https://github.com/php-io-extensions/posi) 0.10 (`posix_*`, `tcgetattr`, `tcsetattr`, `ioctl`, `posi_set_baud_rate`, ...).[^readme][^agents]
+Composer package `microscrap/uart` at **0.11.0** — PHP helpers, facades, enums, and `UARTPort` over the global functions of [**php-io-extensions/posi**](https://github.com/php-io-extensions/posi) 0.11 (`posix_*`, `tcgetattr`, `tcsetattr`, `ioctl`, `posi_set_baud_rate`, ...).[^readme][^agents]
 
 | Field | Value |
 |-------|-------|
 | Name | `microscrap/uart`[^composer] |
-| Version | `0.10.0`[^composer] |
-| PHP | `^8.4\|^8.5\|^8.6`[^composer] |
+| Version | `0.11.0`[^composer] |
+| PHP | `~8.4.27\|\|^8.5.12`[^composer] |
 | Namespace | `Microscrap\Bindings\UART\` → `src/`[^composer] |
-| Require | `php`; `ext-posi` `^0.10.0`[^composer] |
-| Suggest | `scrapyard-io/framework` `^0.10.0` |
+| Require | `php`; `ext-posi` `^0.11.0`[^composer] |
+| Suggest | `scrapyard-io/framework` `^0.11.0` |
 | Homepage | Ecosystem docs overview (see [Ecosystem docs](ecosystem-docs.md))[^readme] |
 | Source | https://github.com/microscrap/uart |
 | Discovery | **None** — no provider / Chassis registration in this package[^agents] |
@@ -72,5 +72,5 @@ Autoloads `src/Helpers/uart-serial.php` and `src/Helpers/uart-termios.php` (each
 | Baud trap | [BaudRate value vs numeric](../traps/baudrate-value-vs-numeric.md) |
 
 [^composer]: Package name, namespace, autoload helpers
-[^readme]: Package README (0.10.x requirements and surface)
+[^readme]: Package README (0.11.x requirements and surface)
 [^agents]: Agent rules for this package

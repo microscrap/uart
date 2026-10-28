@@ -32,7 +32,7 @@ POSIX / Linux termios uses integer `#define`s for baud (`speed_t`), flag bitmask
 - No class-level constants in `src/` — prefer enums.[^agents]
 - Know which path wants **numeric rate** vs **`BaudRate::value` (`speed_t`)** — see [BaudRate value vs numeric](../traps/baudrate-value-vs-numeric.md).
 
-# Enum inventory (0.10.0)
+# Enum inventory (0.11.0)
 
 | Enum | Purpose | Notes |
 |------|---------|-------|

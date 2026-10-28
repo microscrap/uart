@@ -4,7 +4,7 @@
 
 ## Role
 
-Bindings-only Composer package over **ext-posi** 0.10 global functions (`posix_*`, `tcgetattr`, `tcsetattr`, `ioctl`, `posi_set_baud_rate`, ...). Requires only `php` and `ext-posi` `^0.10.0`. Global `uart_*` helpers, facades (`Serial`, `Termios`), enums, and `UARTPort`. No ServiceProvider, no Chassis/Core coupling.
+Bindings-only Composer package over **ext-posi** 0.11 global functions (`posix_*`, `tcgetattr`, `tcsetattr`, `ioctl`, `posi_set_baud_rate`, ...). Requires only `php` and `ext-posi` `^0.11.0`. Global `uart_*` helpers, facades (`Serial`, `Termios`), enums, and `UARTPort`. No ServiceProvider, no Chassis/Core coupling.
 
 ## Rules
 

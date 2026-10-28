@@ -1,9 +1,9 @@
 ---
 type: Reference
 title: Ecosystem docs
-description: "Published ScrapyardIO ecosystem docs for microscrap/uart 0.10.x."
-resource: "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview"
-tags: [orientation, docs, ecosystem, 0.10]
+description: "Published ScrapyardIO ecosystem docs for microscrap/uart 0.11.x."
+resource: "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview"
+tags: [orientation, docs, ecosystem, 0.11]
 generated: { by: "okf-documentation-generator/cursor", at: "2026-08-10T22:03:00Z" }
 status: draft
 sources:
@@ -11,7 +11,7 @@ sources:
     resource: README.md
     title: README production docs link and badges
   - id: overview
-    resource: "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview"
+    resource: "https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview"
     title: Ecosystem overview page
 ---
 
@@ -19,7 +19,7 @@ sources:
 
 Human-facing package docs live on the ScrapyardIO ecosystem site:[^overview][^readme]
 
-[https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.10.x/overview)
+[https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview](https://scrapyard-io.projectsaturnstudios.com/ecosystem/microscrap/uart/0.11.x/overview)
 
 README badges and the production docs banner point at that overview.[^readme]
 
@@ -31,7 +31,7 @@ README badges and the production docs banner point at that overview.[^readme]
 
 # Related
 
-* [Package (0.10)](package.md)
+* [Package (0.11)](package.md)
 
 [^readme]: README production docs link and badges
 [^overview]: Ecosystem overview page

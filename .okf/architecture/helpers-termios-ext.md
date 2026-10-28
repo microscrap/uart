@@ -61,7 +61,7 @@ Composer `autoload.files` registers:[^composer]
 
 Each function is wrapped in `if (! function_exists(...))` so a prior definition wins.[^helpers-serial][^helpers-termios]
 
-# Helper groups (0.10 surface)
+# Helper groups (0.11 surface)
 
 | Group | Helpers | Facade | Downstream |
 |-------|---------|--------|------------|

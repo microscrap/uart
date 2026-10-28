@@ -40,7 +40,7 @@ Other failure modes after a successful open (termios get/set / `posi_set_baud_ra
 # Related
 
 * [Helpers → Termios / posix](../architecture/helpers-termios-ext.md)
-* [Package (0.10)](../orientation/package.md)
+* [Package (0.11)](../orientation/package.md)
 
 [^serial]: uartOpen returns null when posix_open fd < 0
 [^readme]: Linux /dev/tty* device examples and open failure pattern
